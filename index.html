@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sul Sul! 10 Anos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="locked">
+
+  <!-- Tela de carregamento -->
+  <div id="loader">
+    <div class="loader-inner">
+      <div class="plumbob big"></div>
+      <h1 class="loader-title">The Sims <span>Edição 10 Anos</span></h1>
+      <p class="loader-sub" id="loader-sub"></p>
+      <div class="loader-bar"><div></div></div>
+      <p id="tip" class="tip"></p>
+      <button id="start" class="btn btn-green hidden">Sul Sul! Jogar ▶</button>
+    </div>
+  </div>
+
+  <!-- Console de cheats (Ctrl+Shift+C) -->
+  <div id="cheat" class="cheat hidden">
+    <input id="cheat-input" type="text" autocomplete="off" spellcheck="false" placeholder="Digite um cheat... (tente: help)">
+  </div>
+
+  <div id="toasts" aria-live="polite"></div>
+
+  <header class="topbar">
+    <a href="#inicio" class="brand"><span class="plumbob tiny"></span> Modo Viver</a>
+    <nav>
+      <a href="#lote">Lote 3D</a>
+      <a href="#necessidades">Necessidades</a>
+      <a href="#cas">Criar um Sim</a>
+      <a href="#humores">Humores</a>
+      <a href="#relacionamento">Relacionamento</a>
+      <a href="#aspiracao">Aspiração</a>
+      <a href="#evento">Evento</a>
+    </nav>
+    <button class="som" id="som" title="Som">🔊</button>
+  </header>
+
+  <main>
+    <!-- Jogo salvo -->
+    <section id="inicio" class="hero">
+      <p class="simlish">Sul Sul!</p>
+      <h1>Carregar jogo salvo</h1>
+      <div class="save-card panel reveal">
+        <div class="save-art" id="save-art"></div>
+        <div class="save-info" id="save-info"></div>
+      </div>
+    </section>
+
+    <!-- Lote 3D -->
+    <section id="lote">
+      <div class="section-title reveal">
+        <p class="simlish">Modo Viver</p>
+        <h2>A casa da Karine</h2>
+        <p>Arraste para girar. Clique em tudo (principalmente na Karine).</p>
+      </div>
+      <div class="lot panel" id="lot">
+        <div class="lot-canvas" id="lot-canvas"></div>
+        <div class="lot-ui">
+          <div class="clock" id="lot-clock">Sáb · 10:00</div>
+          <div class="speed" id="lot-speed">
+            <button data-speed="0" title="Pausar">⏸</button>
+            <button data-speed="1" title="Normal" class="on">▶</button>
+            <button data-speed="4" title="Rápido">▶▶</button>
+            <button data-speed="12" title="Ultra rápido">▶▶▶</button>
+          </div>
+          <button class="daynight" id="lot-daynight" title="Dia / noite">🌙</button>
+          <button class="daynight" data-familias title="Trocar de família">🔄</button>
+          <button class="daynight" id="lot-walls" title="Levantar / abaixar paredes">🧱</button>
+          <button class="daynight" id="lot-zoom-in" title="Aproximar">➕</button>
+          <button class="daynight" id="lot-zoom-out" title="Afastar">➖</button>
+        </div>
+        <div class="lot-labels" id="lot-labels"></div>
+        <div class="lot-tip" id="lot-tip"></div>
+        <div class="lot-hint">🖱️ Arraste para girar · 👆 Clique nas coisas</div>
+        <div class="lot-fallback">
+          <p>😢 O lote 3D não carregou (sem internet ou sem WebGL).<br>O resto do site funciona normalmente!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Necessidades -->
+    <section id="necessidades">
+      <div class="panel reveal">
+        <div class="panel-head"><span>📊</span> Painel de Necessidades <small id="needs-name"></small></div>
+        <div class="panel-body needs" id="needs"></div>
+      </div>
+    </section>
+
+    <!-- Criar um Sim -->
+    <section id="cas">
+      <div class="panel reveal">
+        <div class="panel-head"><span>✨</span> Criar um Sim</div>
+        <div class="panel-body cas" id="cas-body"></div>
+      </div>
+    </section>
+
+    <!-- Humores -->
+    <section id="humores">
+      <div class="panel reveal">
+        <div class="panel-head"><span>🎭</span> Humores atuais</div>
+        <div class="panel-body moods" id="moods"></div>
+      </div>
+    </section>
+
+    <!-- Relacionamento -->
+    <section id="relacionamento">
+      <div class="panel reveal">
+        <div class="panel-head"><span>💞</span> Relacionamento</div>
+        <div class="panel-body" id="rel"></div>
+      </div>
+    </section>
+
+    <!-- Aspiração / conquistas -->
+    <section id="aspiracao">
+      <div class="section-title reveal">
+        <p class="simlish">Aspiração</p>
+        <h2>Amor Eterno</h2>
+        <p>Conquistas desbloqueadas em 10 anos de jogo.</p>
+      </div>
+      <div class="achv-grid" id="conquistas"></div>
+    </section>
+
+    <!-- Evento final -->
+    <section id="evento">
+      <div class="panel event reveal">
+        <div class="panel-head"><span>🎂</span> Evento de Vida: 10 Anos Juntos</div>
+        <div class="panel-body">
+          <div class="letter" id="letter"></div>
+          <div class="question" id="question">
+            <p class="q-title">Deseja aceitar mais 10 anos (e todos os seguintes)?</p>
+            <div class="q-buttons">
+              <button id="aceitar" class="btn btn-green">Aceitar 💚</button>
+              <button id="recusar" class="btn btn-gray">Recusar</button>
+            </div>
+          </div>
+          <div class="final-msg hidden" id="final-msg">
+            <div class="plumbob big"></div>
+            <h3>Aspiração concluída!</h3>
+            <p>Recompensa desbloqueada: <b>eu, pra sempre</b>. Sem direito a devolução.</p>
+            <p class="simlish">Dag dag... mas só até amanhã. 💚</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p class="simlish">Dag Dag!</p>
+    <p>Feito com 💚 (e zero cheats) para comemorar 10 anos.</p>
+    <button class="cheat-hint" id="cheat-hint" title="Console de cheats">🔧 Ctrl+Shift+C</button>
+  </footer>
+
+  <!-- HUD inferior -->
+  <div id="hud"></div>
+
+  <!-- Menu de interação -->
+  <div id="pie" class="pie hidden"></div>
+
+  <div id="confetti"></div>
+
+  <!-- Trocar de família -->
+  <div id="familias" class="fam hidden">
+    <div class="panel fam-panel">
+      <div class="panel-head"><span>🔄</span> Trocar de família <button class="fam-close" id="fam-close" title="Fechar">✕</button></div>
+      <div class="panel-body">
+        <div class="fam-grid" id="fam-grid"></div>
+        <p class="fam-msg" id="fam-msg">Escolha uma família para jogar.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Carta de Hogwarts -->
+  <div id="hogwarts" class="hogwarts hidden">
+    <div class="parchment">
+      <div class="seal">H</div>
+      <div id="hog-text"></div>
+      <button class="btn" id="hog-close">Malfeito feito ✨</button>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="sound.js"></script>
+  <script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+  <script>
+    // lote: "casa" (planta da casa dela) ou "original" (casinha genérica), definido no data.js
+    document.write('<script src="' + (window.SITE.lote === "original" ? "lot3d-original.js" : "lot3d.js") + '"><\/script>');
+  </script>
+</body>
+</html>
