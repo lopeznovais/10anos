@@ -314,7 +314,26 @@ footer { text-align: center; color: var(--muted); padding: 30px 16px; }
 }
 .hud-achv.pulse { animation: achv-pulse .8s ease-out; }
 @keyframes achv-pulse { 40% { transform: scale(1.35); color: #ffd766; } }
-.hud-money { font-weight: 900; padding-left: 12px; border-left: 2px solid rgba(255, 255, 255, .3); font-variant-numeric: tabular-nums; }
+.hud-money { font-family: inherit; font-size: inherit; color: #fff; background: none; border-top: 0; border-right: 0; border-bottom: 0; cursor: pointer; font-weight: 900; padding-left: 12px; border-left: 2px solid rgba(255, 255, 255, .3); font-variant-numeric: tabular-nums; }
+
+/* ---------- Loja (dinheiro do HUD) ---------- */
+.buy {
+  position: fixed; left: 16px; bottom: 92px; z-index: 46; width: 330px; overflow: hidden;
+  border-radius: 18px; background: #fff; box-shadow: 0 14px 40px rgba(10, 40, 100, .35);
+  animation: radio-in .35s cubic-bezier(.2, 1.2, .4, 1);
+}
+.buy-head { padding: 10px 16px; font-weight: 900; font-size: .85rem; letter-spacing: .04em; text-transform: uppercase; color: #fff; background: linear-gradient(180deg, #3a92f5, var(--blue-700)); }
+.buy-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border: 0; background: none; font: inherit; color: var(--ink); text-align: left; cursor: pointer; transition: background .2s; }
+.buy-item:hover { background: var(--blue-50); }
+.buy-item:active .buy-ico { transform: scale(.85); }
+.buy-ico { flex: none; display: grid; place-items: center; width: 46px; aspect-ratio: 1; border-radius: 14px; font-size: 1.6rem; background: #fff1e8; transition: transform .15s; }
+.buy-txt { flex: 1; min-width: 0; }
+.buy-txt b { display: block; font-size: .92rem; line-height: 1.25; }
+.buy-txt small { color: var(--muted); font-weight: 700; font-size: .75rem; }
+.buy-preco { flex: none; padding: 5px 10px; border-radius: 99px; font-weight: 900; font-size: .85rem; color: #1f6d1a; background: #e3f9da; }
+@media (max-width: 760px) {
+  .buy { left: 10px; right: 10px; bottom: 84px; width: auto; }
+}
 
 /* ---------- Menu de interação ---------- */
 .pie { position: fixed; inset: 0; z-index: 80; background: rgba(10, 30, 70, .35); backdrop-filter: blur(2px); animation: fade .2s; }

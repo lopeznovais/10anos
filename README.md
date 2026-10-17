@@ -28,6 +28,7 @@ Para testar sem estragar a surpresa no aparelho dela, use uma aba anônima.
 - **Lote 3D** (three.js, precisa de internet): arraste para girar e clique em tudo: Karine, TV, coruja (carta de Hogwarts), horta, Meg 🐶, ARMY Bomb, piscina...
 - Relógio com ⏸ ▶ ▶▶ ▶▶▶, botão 🌙 para dia/noite, 🧱 para paredes e ➕/➖ para zoom.
 - Clique no chão para a Karine andar (o Pedro vai atrás). Sofá, TV e cama funcionam. Às 21h ela vai dormir sozinha.
+- **Sushi 🍣:** a mesa de jantar tem sushi. Clicar no dinheiro (§) do HUD abre o Modo Comprar com "Comprar mais Sushi para o Pedro" (§500): cada compra põe uma peça nova no prato dele e o Pedro corre pra mesa. Quando o prato enche, ele come tudo e recomeça. Sem dinheiro? `motherlode`.
 - Som: música e efeitos gerados em código (`sound.js`). Botão 🔊/🔇 no topo.
 - **Rádio ARMY 📻:** clicar no ARMY Bomb (ou o cheat `borahae`) liga o tema roxo e abre um mini player que toca a playlist do YouTube definida em `musicaArmy` no `data.js`. Tem ⏮ ⏯ ⏭, modo aleatório 🔀, volume, barra de progresso clicável e contador de músicas; no computador dá para arrastar o rádio pelo topo. Na primeira música, a Karine e o Pedro dançam no lote. ✕ desliga. A música do site abaixa enquanto o rádio toca, e o player segue o botão 🔊/🔇. Vídeos que não podem tocar fora do YouTube são pulados sozinhos.
 - Clique no Sim dela (ou no dele) na seção **Relacionamento** para abrir o menu de interações.
