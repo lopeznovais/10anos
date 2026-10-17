@@ -197,13 +197,10 @@ window.SITE = {
   // ✏️ Easter egg: digite "alohomora" no console de cheats (troque pela sua mensagem secreta)
   segredo: "Se você achou isso, é porque é a pessoa mais curiosa que eu conheço. E eu amo isso em você. 💚",
 
-  // ✏️ A CARTA FINAL. Aqui é sem piada: escreva do coração.
+  // ✏️ O texto antes da pergunta final ("Deseja aceitar mais 10 anos?"). Curto e do meu jeito.
   carta: [
-    "Dez anos atrás eu não fazia ideia de que estava começando o melhor jogo da minha vida.",
-    "Com você eu aprendi que a vida é feita de coisas pequenas: um episódio a mais, um café na cama. Você transforma dias comuns em memórias que eu quero guardar pra sempre.",
-    "Obrigado por cada abraço, por cada paciência, por cada vez que você escolheu ficar. Obrigado por ser minha parceira de fazenda, de maratona, de aventura e de vida.",
-    "Se eu pudesse criar um Sim perfeito, não mudaria nada. Porque ele já existe, e é você.",
-    "E como eu sei que você gosta de saber o final antes de começar, aqui vai o spoiler da nossa história: é um final feliz. 💚",
+    "Como você já sabe, não sou muito bom com palavras... então fiz um jogo. 🎮",
+    "E todo bom jogo termina com uma escolha:",
   ],
-  assinatura: "Com todo o meu amor, Pedro",   // ✏️
+  assinatura: "— Pedro 💚",   // ✏️
 };
