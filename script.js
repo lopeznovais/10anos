@@ -44,7 +44,7 @@
     <div class="hud-av"><span class="plumbob" id="hud-pb" title="?"></span>${avatar(S.ela, "sm")}</div>
     <div class="hud-txt"><b>${S.ela.apelido}</b><small id="hud-mood"></small></div>
     <button class="hud-achv" id="hud-achv" title="Conquistas">🏆 <span id="hud-achv-n"></span></button>
-    <div class="hud-money">§ <span id="hud-money">${fmt(money)}</span></div>`;
+    <button class="hud-money" id="hud-money-btn" title="Comprar">§ <span id="hud-money">${fmt(money)}</span></button>`;
 
   function setMood(m, ms = 6000) {
     $("#hud-mood").textContent = `${m.emoji} ${m.nome}`;
@@ -61,6 +61,35 @@
     requestAnimationFrame(step);
   }
   setMood(DEFAULT_MOOD);
+
+  // ---------- Loja (clique no dinheiro do HUD) ----------
+  const PRECO_SUSHI = 500;
+  const buy = $("#buy");
+  const sushiFalas = [
+    `O ${S.ele.nome} está Muito Feliz. +50 Romance.`,
+    "Ele disse que vai dividir. Não vai.",
+    `${S.ele.nome} ganhou o humor "Barriga Cheia". Você ganhou um beijo com gosto de shoyu.`,
+    "Investimento com retorno garantido: um namorado sorridente.",
+    "Salmão, atum e amor. Nessa ordem (segundo ele).",
+  ];
+  let sushiN = 0;
+  $("#buy-preco").textContent = `§${fmt(PRECO_SUSHI)}`;
+  $("#hud-money-btn").addEventListener("click", e => {
+    e.stopPropagation();
+    buy.classList.toggle("hidden");
+    window.SIMSOUND?.play("pop");
+  });
+  $("#buy-sushi").addEventListener("click", () => {
+    if (money < PRECO_SUSHI) {
+      window.SIMSOUND?.play("erro");
+      return toast("Fundos insuficientes", "Simoleons acabaram. Dica: experimente o cheat motherlode. 😉", "💸");
+    }
+    addMoney(-PRECO_SUSHI);
+    window.SIMSOUND?.play("clique");
+    toast(`+1 sushi pro ${S.ele.nome} 🍣`, sushiFalas[sushiN++ % sushiFalas.length], "🍣");
+    window.dispatchEvent(new CustomEvent("sims:sushi"));
+  });
+  document.addEventListener("click", e => { if (!e.target.closest("#buy")) buy.classList.add("hidden"); });
 
   // ---------- Loader ----------
   $("#loader-sub").textContent = `${S.ela.nome} & ${S.ele.nome}`;
@@ -363,7 +392,7 @@
     if (o.humor) setMood(o.humor);
     window.dispatchEvent(new CustomEvent("sims:interacao", { detail: { ...o, quem: pieWho } }));
   });
-  document.addEventListener("keydown", e => { if (e.key === "Escape") { closePie(); $("#cheat").classList.add("hidden"); $("#familias").classList.add("hidden"); } });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { closePie(); $("#buy").classList.add("hidden"); $("#cheat").classList.add("hidden"); $("#familias").classList.add("hidden"); } });
 
   // ---------- Trocar de família ----------
   const fam = $("#familias"), famMsg = $("#fam-msg");

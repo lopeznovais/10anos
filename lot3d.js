@@ -317,6 +317,42 @@
   mesh(new THREE.SphereGeometry(0.14, 8, 6), mat(0xff5fa2), 0, 1.08, 0, mesa);
   blockers.push([2.0, -4.3, 3.8, -2.2]);
 
+  // Sushi na mesa (o favorito do Pedro). Comprar mais pelo dinheiro do HUD.
+  const rice = mat(0xfbf8ef), nori = mat(0x1f3d2b);
+  const FISH = [0xff8a5c, 0xd84343, 0xffb38a, 0xfff0a8]; // salmão, atum, camarão, tamago
+  function nigiri(parent, x, z, rotY = 0, fish = pick(FISH)) {
+    const g = group(x, 0, z, parent);
+    g.rotation.y = rotY;
+    mesh(new THREE.BoxGeometry(0.13, 0.05, 0.075), rice, 0, 0.025, 0, g);
+    mesh(new THREE.BoxGeometry(0.15, 0.025, 0.085), mat(fish), 0, 0.062, 0, g);
+    return g;
+  }
+  function maki(parent, x, z) {
+    const g = group(x, 0, z, parent);
+    mesh(new THREE.CylinderGeometry(0.042, 0.042, 0.06, 10), nori, 0, 0.03, 0, g);
+    mesh(new THREE.CylinderGeometry(0.034, 0.034, 0.062, 10), rice, 0, 0.031, 0, g);
+    mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.064, 6), mat(pick(FISH)), 0, 0.032, 0, g);
+    return g;
+  }
+  // Tábua (geta) com 4 peças, hashi e shoyu
+  const geta = group(-0.38, 0.79, 0.05, mesa);
+  geta.rotation.y = Math.PI / 2;
+  mesh(new THREE.BoxGeometry(0.62, 0.035, 0.26), mat(0xc79a5c), 0, 0.03, 0, geta);
+  for (const x of [-0.24, 0.24]) mesh(new THREE.BoxGeometry(0.04, 0.03, 0.22), mat(0xa77a42), x, 0.005, 0, geta);
+  nigiri(geta, -0.18, 0, 0, FISH[0]).position.y = 0.048;
+  nigiri(geta, -0.03, 0, 0, FISH[1]).position.y = 0.048;
+  maki(geta, 0.11, -0.05).position.y = 0.048;
+  maki(geta, 0.2, 0.05).position.y = 0.048;
+  for (const dz of [-0.02, 0.02]) mesh(new THREE.BoxGeometry(0.012, 0.012, 0.4), mat(0x8b5a2b), -0.18 + dz, 0.8, -0.38, mesa).rotation.y = 0.15;
+  mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.025, 12), white, -0.05, 0.805, 0.38, mesa);
+  mesh(new THREE.CylinderGeometry(0.048, 0.048, 0.006, 12), mat(0x3a1f12), -0.05, 0.82, 0.38, mesa);
+
+  // Prato do Pedro: cada compra põe uma peça nova (quando enche, ele come tudo e recomeça)
+  const prato = group(0.36, 0.79, 0.05, mesa);
+  mesh(new THREE.CylinderGeometry(0.24, 0.2, 0.025, 20), white, 0, 0.0125, 0, prato);
+  const SLOTS = [[0, 0], ...Array.from({ length: 7 }, (_, k) => [Math.cos(k * 0.9) * 0.14, Math.sin(k * 0.9) * 0.14])];
+  let pratoPecas = [], sushiPops = [];
+
   // ----- Cozinha: geladeira + bancada com filtro de barro -----
   const fridge = clickable(group(7.85, 0, -6.05), "fridge", "🧊 Geladeira");
   mesh(new THREE.BoxGeometry(0.72, 1.9, 0.66), mat(0xeef3f7), 0, 0.95, 0, fridge);
@@ -884,6 +920,25 @@
       burst(headPos(s, 0.2), ["✨", "🔄"], 10, 0.4);
     }
   });
+  // Comprou sushi (menu do dinheiro no HUD): peça nova no prato e o Pedro corre pra mesa
+  window.addEventListener("sims:sushi", () => {
+    if (pratoPecas.length >= SLOTS.length) {
+      pratoPecas.forEach(p => prato.remove(p));
+      pratoPecas = [];
+      toast(`${S.ele.nome} comeu o prato inteiro`, "Repondo... (ele jura que foi só uma peça)", "😋");
+    }
+    const [x, z] = SLOTS[pratoPecas.length];
+    const peca = Math.random() < 0.6 ? nigiri(prato, x, z, rand(0, Math.PI)) : maki(prato, x, z);
+    peca.position.y = 0.025;
+    peca.scale.setScalar(0.01);
+    pratoPecas.push(peca);
+    sushiPops.push({ obj: peca, t: 0 });
+    sfx("pop");
+    burst(mesa.position.clone().setY(1.3), ["🍣", "✨"], 6, 0.35);
+    if (pedro.state === "lie") return; // dormindo: o sushi espera até amanhã
+    const spot = spotNear(mesa.position, 1.35, pedro.pos);
+    walkTo(pedro, spot, () => burst(headPos(pedro, 0.5), ["😋", "🍣", "💕"], 9, 0.35), yawTo(spot, mesa.position));
+  });
   window.addEventListener("sims:final", () => {
     for (let i = 0; i < 4; i++) setTimeout(() => burst(between(), ["💖", "💚", "💍", "✨"], 14, 0.5), i * 400);
   });
@@ -1449,6 +1504,14 @@
       p.sp.position.z += p.vz * raw;
       p.sp.material.opacity = 1 - p.age / p.life;
       if (p.age >= p.life) { scene.remove(p.sp); p.sp.material.dispose(); particles.splice(i, 1); }
+    }
+
+    // Peças de sushi novas "nascem" com um pulinho
+    for (let i = sushiPops.length - 1; i >= 0; i--) {
+      const p = sushiPops[i];
+      p.t = Math.min(1, p.t + raw * 2.5);
+      p.obj.scale.setScalar(Math.max(0.01, 1 + Math.sin(p.t * Math.PI) * 0.35 * (1 - p.t)) * Math.min(1, p.t * 1.6));
+      if (p.t >= 1) { p.obj.scale.setScalar(1); sushiPops.splice(i, 1); }
     }
 
     // Etiquetas de nome acima do plumbob
