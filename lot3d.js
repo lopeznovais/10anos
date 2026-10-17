@@ -6,6 +6,7 @@
   const box = document.getElementById("lot-canvas");
   const API = window.SIMS || {};
   const toast = (...a) => API.toast && API.toast(...a);
+  const achieve = id => API.achieve && API.achieve(id);
 
   let renderer;
   try {
@@ -812,6 +813,7 @@
     } else {
       toast("De volta pra cama", `${S.ela.nome} lembrou que já passou das 21h.`, "😴");
     }
+    achieve("boanoite");
     goBed(karine);
     if (pedro.state !== "sit" && pedro.state !== "lie") goSit(pedro);
   }
@@ -864,6 +866,22 @@
   window.addEventListener("sims:interacao", e => {
     const o = e.detail;
     if (o.anim) play(o.anim, o.quem === "pedro" ? 1 : 0, { icon: o.balao });
+  });
+  // Cheats do console que mexem no lote (headlineeffects, clock.advance_game_time, resetsim)
+  window.addEventListener("sims:cheat", e => {
+    const { cmd, arg } = e.detail;
+    if (cmd === "headlineeffects") sims.forEach(s => (s.pb.visible = arg));
+    if (cmd === "advance_time") gameMin += arg;
+    if (cmd === "resetsim") {
+      const s = arg === "pedro" ? pedro : karine;
+      act = null;
+      clearProps();
+      standUp(s);
+      Object.assign(s, { state: "idle", path: [], onArrive: null, faceOnArrive: null, idleT: 0 });
+      s.pos.copy(s === karine ? HOME.k : HOME.p);
+      if (s === karine) autoSlept = false;
+      burst(headPos(s, 0.2), ["✨", "🔄"], 10, 0.4);
+    }
   });
   window.addEventListener("sims:final", () => {
     for (let i = 0; i < 4; i++) setTimeout(() => burst(between(), ["💖", "💚", "💍", "✨"], 14, 0.5), i * 400);
@@ -1014,6 +1032,7 @@
 
   const actions = {
     karine: ev => {
+      if (isAsleep()) achieve("porquinho");
       if (isAsleep() && !wokeUpWarned) { wokeUpWarned = true; toast("Shhh!", `${S.ela.nome} está dormindo. Mas pra você ela acorda. 💤`, "😴"); }
       API.openPieAt && API.openPieAt(ev.clientX, ev.clientY);
     },
@@ -1033,6 +1052,7 @@
             epIndex = (epIndex + 1) % episodes.length;
             drawTV(episodes[epIndex]);
             toast("Final feliz confirmado ✅", `Agora sim: ${episodes[epIndex][0]}. Pode dar play.`, "📺");
+            achieve("spoiler");
           },
         });
       }, yawTo(SEATS.k.stand, tv.position));
@@ -1053,6 +1073,7 @@
       startAct("agua", 0);
       toast("+10 Hidratação", `${S.ela.nome} bebeu água SEM ninguém lembrar. Evento raríssimo! 💧`, "🚰");
       API.setMood && API.setMood({ emoji: "💧", nome: "Hidratada" });
+      achieve("agua");
     }),
     ball: () => {
       if (ballFly || ballHeld || dog.task) return;
@@ -1067,13 +1088,17 @@
         sfx("pop");
         ballFly = { from: karine.pos.clone().setY(1.7), to, t: 0 };
         dogTask("fetch", to);
+        achieve("meg");
       });
     },
     bed: () => {
       autoSlept = isNight();
       showMarker(BEDS.k.stand);
       sfx("clique");
-      goBed(karine, () => toast(isNight() ? "Boa noite! 💤" : "Cochilo da tarde", `${S.ela.nome} dormiu em 4 segundos. Recorde pessoal.`, "😴"));
+      goBed(karine, () => {
+        toast(isNight() ? "Boa noite! 💤" : "Cochilo da tarde", `${S.ela.nome} dormiu em 4 segundos. Recorde pessoal.`, "😴");
+        if (isNight()) achieve("boanoite");
+      });
       goBed(pedro);
     },
     shelf: () => goDo(new THREE.Vector3(-5.25, 0, -0.25), shelf.position, () => toast("Estante de Hogwarts", "7 livros, 3 edições de cada. A Karine sabe explicar o porquê. (Lufa-Lufa raiz 🦡)", "📚")),
@@ -1095,7 +1120,7 @@
       flag.rotation.z = -1.2;
       sfx("sininho");
       if (!dog.task) dogTask("bark", BARK_SPOT);
-      setTimeout(() => carta.classList.remove("hidden"), 900);
+      setTimeout(() => { carta.classList.remove("hidden"); achieve("maroto"); }, 900);
     }),
     crop: (ev, obj) => {
       const c = obj.userData.crop;
@@ -1109,6 +1134,7 @@
         sfx("colher");
         burst(obj.position.clone().setY(0.8), [c.type.emoji], 4, 0.45);
         toast(`Você colheu: ${c.type.nome}!`, `+1 coração com ${S.ele.nome} 💚`, c.type.emoji);
+        achieve("colheita");
       });
     },
     // Cômodos novos da casa
@@ -1351,6 +1377,7 @@
     const night = isNight();
     if (karine.state === "idle" && !act && speed) karine.idleT += raw; else karine.idleT = 0;
     if (night && karine.idleT > (bedtimeToast ? 6 : 1)) { karine.idleT = 0; bedtime(); }
+    if (night && isAsleep()) achieve("boanoite"); // dormiu depois das 21h (na cama ou no sofá)
     if (!night && autoSlept && karine.state === "lie") morning();
     if (!night) wokeUpWarned = oinkToast = false;
 

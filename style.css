@@ -235,6 +235,9 @@ section { padding: 40px 0; }
 .achv-ico .lock { position: absolute; right: -6px; bottom: -6px; font-size: 1.1rem; width: 30px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, .15); }
 .achv-card.unlocked .achv-ico { filter: none; opacity: 1; background: linear-gradient(180deg, #fff3c4, #ffd766); border-color: #f5b400; transform: scale(1.08); }
 .achv-card.unlocked h3 { color: var(--blue-900); }
+.achv-dica { font-style: italic; }
+.achv-texto, .achv-card.unlocked .achv-dica { display: none; }
+.achv-card.unlocked .achv-texto { display: inline; }
 
 /* ---------- Evento final ---------- */
 .event .panel-head { background: linear-gradient(180deg, #ff8cc0, #e8468f); }
@@ -277,6 +280,12 @@ footer { text-align: center; color: var(--muted); padding: 30px 16px; }
 .hud-av .plumbob { position: absolute; top: -34px; left: 50%; width: 18px; margin-left: -9px; cursor: pointer; }
 .hud-txt b { display: block; line-height: 1.1; }
 .hud-txt small { font-weight: 700; opacity: .9; }
+.hud-achv {
+  font-family: inherit; font-size: .95rem; font-weight: 900; color: #fff; cursor: pointer; white-space: nowrap; font-variant-numeric: tabular-nums;
+  padding: 0 0 0 12px; background: none; border: 0; border-left: 2px solid rgba(255, 255, 255, .3);
+}
+.hud-achv.pulse { animation: achv-pulse .8s ease-out; }
+@keyframes achv-pulse { 40% { transform: scale(1.35); color: #ffd766; } }
 .hud-money { font-weight: 900; padding-left: 12px; border-left: 2px solid rgba(255, 255, 255, .3); font-variant-numeric: tabular-nums; }
 
 /* ---------- Menu de interação ---------- */
@@ -295,6 +304,10 @@ footer { text-align: center; color: var(--muted); padding: 30px 16px; }
 @keyframes pop { to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
 
 /* ---------- Console de cheats ---------- */
+.cheat-out { margin-top: 8px; max-height: 50vh; overflow-y: auto; font: .85rem/1.7 ui-monospace, Consolas, monospace; color: #cfe8c6; }
+.cheat-out b { color: #9df27c; }
+body.no-headline .plumbob { visibility: hidden; }
+.fps { position: fixed; top: 64px; left: 10px; z-index: 96; padding: 4px 8px; border-radius: 6px; font: 700 .8rem ui-monospace, Consolas, monospace; color: #9df27c; background: rgba(10, 20, 40, .85); pointer-events: none; }
 .cheat { position: fixed; top: 0; left: 0; right: 0; z-index: 95; padding: 10px 16px; background: rgba(10, 20, 40, .92); }
 .cheat input { width: 100%; font: 700 1rem ui-monospace, Consolas, monospace; color: #9df27c; background: transparent; border: 1px solid #3b5a3b; border-radius: 8px; padding: 10px 12px; outline: none; }
 

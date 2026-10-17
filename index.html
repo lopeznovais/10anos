@@ -4,6 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sul Sul! 10 Anos</title>
+  <meta name="description" content="Karine & Pedro: um jogo salvo muito especial. 10 anos de namoro no estilo The Sims.">
+  <meta name="theme-color" content="#1b5fc4">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <!-- Prévia do link (WhatsApp, Instagram, iMessage...). A imagem precisa de URL absoluta. -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:url" content="https://karine-e-pedro.com.br/">
+  <meta property="og:title" content="Sul Sul! 10 Anos">
+  <meta property="og:description" content="Karine & Pedro: um jogo salvo muito especial. 💚">
+  <meta property="og:image" content="https://karine-e-pedro.com.br/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Plumbob verde com o texto Sul Sul! 10 Anos, Karine & Pedro">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -25,7 +41,8 @@
 
   <!-- Console de cheats (Ctrl+Shift+C) -->
   <div id="cheat" class="cheat hidden">
-    <input id="cheat-input" type="text" autocomplete="off" spellcheck="false" placeholder="Digite um cheat... (tente: help)">
+    <input id="cheat-input" type="text" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="Digite um cheat... (tente: help)">
+    <div class="cheat-out hidden" id="cheat-out"></div>
   </div>
 
   <div id="toasts" aria-live="polite"></div>
@@ -124,7 +141,7 @@
       <div class="section-title reveal">
         <p class="simlish">Aspiração</p>
         <h2>Amor Eterno</h2>
-        <p>Conquistas desbloqueadas em 10 anos de jogo.</p>
+        <p id="achv-count"></p>
       </div>
       <div class="achv-grid" id="conquistas"></div>
     </section>
