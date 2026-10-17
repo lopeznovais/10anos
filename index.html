@@ -33,8 +33,27 @@
       <div class="plumbob big"></div>
       <h1 class="loader-title">The Sims <span>Edição 10 Anos</span></h1>
       <p class="loader-sub" id="loader-sub"></p>
-      <div class="loader-bar"><div></div></div>
+      <div class="loader-bar" id="loader-bar"><div></div></div>
       <p id="tip" class="tip"></p>
+
+      <!-- Senha (código de registro, igual na instalação do The Sims) -->
+      <form id="gate" class="gate hidden" autocomplete="off">
+        <label class="gate-label" for="gate-input">🔑 Insira o código de registro do seu jogo</label>
+        <div class="gate-row">
+          <input id="gate-input" type="text" placeholder="Código de registro" autocapitalize="off" autocorrect="off" spellcheck="false">
+          <button class="btn btn-green" type="submit">OK</button>
+        </div>
+        <p class="gate-msg" id="gate-msg" aria-live="polite"></p>
+      </form>
+
+      <!-- Mensagem depois da senha -->
+      <div id="welcome" class="welcome hidden">
+        <div class="welcome-card">
+          <p class="welcome-head">💌 Uma mensagem antes de começar</p>
+          <div id="welcome-text"></div>
+        </div>
+      </div>
+
       <button id="start" class="btn btn-green hidden">Sul Sul! Jogar ▶</button>
     </div>
   </div>
@@ -183,6 +202,31 @@
   <div id="pie" class="pie hidden"></div>
 
   <div id="confetti"></div>
+
+  <!-- Rádio ARMY (toca a playlist do YouTube quando o ARMY Bomb acende) -->
+  <div id="radio" class="radio hidden" aria-label="Rádio ARMY">
+    <div class="radio-head" id="radio-head">
+      <div class="radio-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="radio-info">
+        <small>📻 Rádio ARMY <span id="radio-count"></span></small>
+        <div class="radio-title"><span id="radio-title">Sintonizando...</span></div>
+      </div>
+      <button class="radio-x" id="radio-close" title="Desligar o rádio">✕</button>
+    </div>
+    <div class="radio-screen">
+      <div id="radio-player"></div>
+      <div class="radio-tap hidden" id="radio-tap">▶ Toque no vídeo para tocar</div>
+    </div>
+    <div class="radio-progress" id="radio-progress" title="Pular para..."><div id="radio-bar"></div></div>
+    <div class="radio-ctrl">
+      <span class="radio-time" id="radio-time">0:00</span>
+      <button id="radio-prev" title="Música anterior">⏮</button>
+      <button class="radio-play" id="radio-play" title="Pausar / tocar">⏸</button>
+      <button id="radio-next" title="Próxima música">⏭</button>
+      <button id="radio-shuffle" title="Aleatório">🔀</button>
+      <input type="range" id="radio-vol" min="0" max="100" value="80" title="Volume" aria-label="Volume">
+    </div>
+  </div>
 
   <!-- Trocar de família -->
   <div id="familias" class="fam hidden">

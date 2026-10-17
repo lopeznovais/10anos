@@ -75,13 +75,62 @@
       $("#tip").classList.remove("fade");
     }, 250);
   }, 1500);
-  setTimeout(() => $("#start").classList.remove("hidden"), 5000);
+  // Senha: aparece como "código de registro" no fim do carregamento.
+  // Depois de acertar uma vez, o navegador lembra e não pede de novo.
+  const SENHA_KEY = "sims-liberado";
+  let liberado = !S.senha;
+  try { liberado = liberado || localStorage.getItem(SENHA_KEY) === "1"; } catch (e) {}
+  let somIniciado = false;
+  const iniciarSom = () => { if (!somIniciado) { somIniciado = true; window.SIMSOUND?.start(); } };
+  setTimeout(() => {
+    if (liberado) return $("#start").classList.remove("hidden");
+    clearInterval(tipTimer);
+    $("#loader").classList.add("unlocked");
+    $("#gate").classList.remove("hidden");
+    $("#gate-input").focus();
+  }, 5000);
+
+  const norm = s => s.trim().toLowerCase().replace(/\s+/g, "");
+  let erros = 0;
+  $("#gate").addEventListener("submit", e => {
+    e.preventDefault();
+    const gate = $("#gate"), inp = $("#gate-input");
+    if (norm(inp.value) !== norm(S.senha)) {
+      const dicas = S.dicasSenha || ["Código de registro inválido."];
+      $("#gate-msg").textContent = dicas[Math.min(erros++, dicas.length - 1)];
+      gate.classList.remove("erro");
+      void gate.offsetWidth;
+      gate.classList.add("erro");
+      inp.select();
+      return;
+    }
+    try { localStorage.setItem(SENHA_KEY, "1"); } catch (err) {}
+    inp.blur();
+    gate.classList.add("hidden");
+    iniciarSom();
+    window.SIMSOUND?.play("conquista");
+    mostrarMensagem();
+  });
+
+  // A mensagem aparece parágrafo por parágrafo, e só depois o botão de jogar
+  function mostrarMensagem() {
+    const paras = [...(S.mensagemInicial || []), `— ${S.ele.nome}`];
+    $("#welcome-text").innerHTML = paras.map((p, i) => `<p class="${i === paras.length - 1 ? "sign" : ""}">${p}</p>`).join("");
+    $("#welcome").classList.remove("hidden");
+    const ps = $$("#welcome-text p");
+    ps.forEach((p, i) => setTimeout(() => p.classList.add("in"), 500 + i * 1800));
+    setTimeout(() => {
+      $("#start").classList.remove("hidden");
+      $("#start").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }, 500 + ps.length * 1800);
+  }
+
   $("#start").addEventListener("click", () => {
     clearInterval(tipTimer);
     $("#loader").classList.add("gone");
     document.body.classList.remove("locked");
     $("#hud").classList.add("show");
-    window.SIMSOUND?.start();
+    iniciarSom();
     setTimeout(() => toast(`Sul Sul, ${S.ela.apelido}!`, "Bem-vinda de volta ao seu jogo salvo favorito.", "💚"), 700);
     // Igual na vida real: o Pedro lembrando ela de beber água de tempos em tempos
     const lembretes = ["Amor, bebe água! 💧", "Já bebeu água hoje? (Gole de café não conta.)", "Pausa para hidratação. Eu espero.", "Sua barra de Hidratação está no vermelho!"];
@@ -397,6 +446,159 @@
     }
   }
 
+  // ---------- Rádio ARMY (YouTube) ----------
+  // O ARMY Bomb (ou o cheat "borahae") liga o tema roxo e toca a playlist do data.js.
+  const radio = $("#radio"), rTitle = $("#radio-title"), rPlay = $("#radio-play"), rTap = $("#radio-tap");
+  let yt = null, ytReady = false, ytApi = null, radioTimer = null, danced = false, shuffle = false;
+  let vol = 80;
+  try { vol = +(localStorage.getItem("sims-radio-vol") ?? 80); } catch (e) {}
+  $("#radio-vol").value = vol;
+  const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+  const loadYT = () => ytApi || (ytApi = new Promise((ok, fail) => {
+    if (window.YT && YT.Player) return ok();
+    window.onYouTubeIframeAPIReady = ok;
+    const s = document.createElement("script");
+    s.src = "https://www.youtube.com/iframe_api";
+    s.onerror = () => { ytApi = null; fail(); };
+    document.head.appendChild(s);
+  }));
+
+  // Título comprido rola de um lado pro outro
+  function setTitle(t) {
+    rTitle.textContent = t;
+    const box = rTitle.parentElement;
+    box.classList.remove("scroll");
+    requestAnimationFrame(() => {
+      const extra = rTitle.offsetWidth - box.clientWidth;
+      if (extra <= 0) return;
+      box.style.setProperty("--shift", `${-extra}px`);
+      box.style.setProperty("--dur", `${Math.max(6, extra / 18)}s`);
+      box.classList.add("scroll");
+    });
+  }
+
+  // Tempo, barra de progresso e "música X de Y"
+  function radioTick() {
+    if (!ytReady) return;
+    const cur = yt.getCurrentTime() || 0, dur = yt.getDuration() || 0;
+    $("#radio-time").textContent = `${mmss(cur)} / ${mmss(dur)}`;
+    $("#radio-bar").style.width = dur ? `${(cur / dur) * 100}%` : "0";
+    const list = yt.getPlaylist();
+    $("#radio-count").textContent = list ? `· ${yt.getPlaylistIndex() + 1} de ${list.length}` : "";
+  }
+
+  function onState(e) {
+    const st = e.data, playing = st === YT.PlayerState.PLAYING;
+    radio.classList.toggle("playing", playing);
+    rPlay.textContent = playing ? "⏸" : "▶";
+    if (playing) {
+      rTap.classList.add("hidden");
+      setTitle(yt.getVideoData().title || "Rádio ARMY");
+      // Na primeira música, os Sims dançam no lote 3D
+      if (!danced) {
+        danced = true;
+        window.dispatchEvent(new CustomEvent("sims:interacao", { detail: { anim: "danca", quem: "karine" } }));
+      }
+    }
+    radioTick();
+  }
+
+  function radioOn() {
+    let video, list;
+    try { const u = new URL(S.musicaArmy); video = u.searchParams.get("v"); list = u.searchParams.get("list"); } catch (e) { return; }
+    radio.classList.remove("hidden");
+    window.SIMSOUND?.musica(false);
+    danced = false;
+    clearInterval(radioTimer);
+    radioTimer = setInterval(radioTick, 500);
+    if (yt) return ytReady && yt.playVideo();
+    setTitle("Sintonizando...");
+    loadYT().then(() => {
+      yt = new YT.Player("radio-player", {
+        videoId: video || undefined,
+        playerVars: { autoplay: 1, playsinline: 1, controls: 0, rel: 0, iv_load_policy: 3, ...(list ? { list, listType: "playlist" } : {}) },
+        events: {
+          onReady: e => {
+            ytReady = true;
+            e.target.setVolume(vol);
+            if (window.SIMSOUND?.mudo) e.target.mute();
+            e.target.playVideo();
+            // Celular às vezes bloqueia o autoplay: aí mostra o aviso pra tocar no vídeo
+            setTimeout(() => { if (e.target.getPlayerState() !== YT.PlayerState.PLAYING) rTap.classList.remove("hidden"); }, 2500);
+          },
+          onStateChange: onState,
+          onError: e => e.target.nextVideo(), // vídeo que não pode tocar fora do YouTube: pula pro próximo
+        },
+      });
+    }).catch(() => {
+      radioOff();
+      toast("Rádio fora do ar", "Sem internet pra tocar BTS agora. 😢", "📻");
+    });
+  }
+  function radioOff() {
+    radio.classList.add("hidden");
+    radio.classList.remove("playing");
+    clearInterval(radioTimer);
+    if (ytReady) yt.pauseVideo();
+    window.SIMSOUND?.musica(true);
+  }
+  function setBorahae(on) {
+    document.body.classList.toggle("borahae", on);
+    window.dispatchEvent(new CustomEvent("sims:cheat", { detail: { cmd: "borahae", arg: on } }));
+    toast(on ? "보라해 💜" : "Modo normal", on ? "I purple you. Frase criada pelo V, o bias dela. Tema ARMY ativado. 🎶" : "De volta ao azul do Modo Viver.", "💜");
+    if (on) { confetti(40, ["💜", "🫰", "✨"]); achieve("borahae"); }
+    if (S.musicaArmy) on ? radioOn() : radioOff();
+  }
+
+  // Controles
+  const ytDo = fn => () => { if (ytReady) fn(); };
+  $("#radio-close").addEventListener("click", () => setBorahae(false));
+  rPlay.addEventListener("click", ytDo(() => yt.getPlayerState() === YT.PlayerState.PLAYING ? yt.pauseVideo() : yt.playVideo()));
+  $("#radio-next").addEventListener("click", ytDo(() => yt.nextVideo()));
+  $("#radio-prev").addEventListener("click", ytDo(() => (yt.getCurrentTime() > 5 ? yt.seekTo(0, true) : yt.previousVideo())));
+  $("#radio-shuffle").addEventListener("click", ytDo(() => {
+    shuffle = !shuffle;
+    yt.setShuffle(shuffle);
+    $("#radio-shuffle").classList.toggle("on", shuffle);
+    toast(shuffle ? "Modo aleatório" : "Ordem normal", shuffle ? "A próxima música é surpresa. 🔀" : "De volta à ordem da playlist.", "📻");
+  }));
+  $("#radio-vol").addEventListener("input", e => {
+    vol = +e.target.value;
+    if (ytReady) { yt.setVolume(vol); if (vol && !window.SIMSOUND?.mudo) yt.unMute(); }
+    try { localStorage.setItem("sims-radio-vol", vol); } catch (err) {}
+  });
+  $("#radio-progress").addEventListener("click", e => {
+    if (!ytReady) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    yt.seekTo(((e.clientX - r.left) / r.width) * yt.getDuration(), true);
+    setTimeout(radioTick, 100);
+  });
+  // O botão 🔊/🔇 do topo também muta o rádio
+  $("#som").addEventListener("click", () => setTimeout(() => {
+    if (ytReady) window.SIMSOUND?.mudo ? yt.mute() : yt.unMute();
+  }));
+
+  // Arrastar o rádio pelo cabeçalho (só no computador; no celular ele fica fixo embaixo)
+  let drag = null;
+  $("#radio-head").addEventListener("pointerdown", e => {
+    if (innerWidth <= 760 || e.target.closest("button")) return;
+    const r = radio.getBoundingClientRect();
+    drag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+    radio.classList.add("dragging");
+    e.currentTarget.setPointerCapture(e.pointerId);
+  });
+  $("#radio-head").addEventListener("pointermove", e => {
+    if (!drag) return;
+    const x = Math.min(Math.max(8, e.clientX - drag.dx), innerWidth - radio.offsetWidth - 8);
+    const y = Math.min(Math.max(8, e.clientY - drag.dy), innerHeight - radio.offsetHeight - 8);
+    Object.assign(radio.style, { left: `${x}px`, top: `${y}px`, right: "auto", bottom: "auto" });
+  });
+  const endDrag = () => { drag = null; radio.classList.remove("dragging"); };
+  $("#radio-head").addEventListener("pointerup", endDrag);
+  $("#radio-head").addEventListener("pointercancel", endDrag);
+  addEventListener("resize", () => { if (innerWidth <= 760) radio.removeAttribute("style"); });
+
   // ---------- Cheats ----------
   // Os mesmos códigos do The Sims (1 ao 4), com o efeito adaptado ao site.
   // Como no jogo: alguns só funcionam depois de "testingcheats true".
@@ -562,11 +764,7 @@
     "aspirations.complete_current_milestone": () => toast("Cheat recusado", "A aspiração Amor Eterno não aceita atalhos. 10 anos, zero cheats, lembra? Vai ter que descobrir os segredos.", "🏆"),
 
     // ----- Exclusivos deste jogo -----
-    borahae: () => {
-      const on = document.body.classList.toggle("borahae");
-      toast(on ? "보라해 💜" : "Modo normal", on ? "I purple you. Frase criada pelo V, o bias dela. Tema ARMY ativado." : "De volta ao azul do Modo Viver.", "💜");
-      if (on) { confetti(40, ["💜", "🫰", "✨"]); achieve("borahae"); }
-    },
+    borahae: () => setBorahae(!document.body.classList.contains("borahae")),
     alohomora: () => { toast("Mensagem secreta desbloqueada", S.segredo, "🗝️"); achieve("alohomora"); },
     sulsul: () => toast("Sul Sul!", "Nooboo! Vadish! (Tradução: te amo muito.)", "👋"),
   };

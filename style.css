@@ -92,6 +92,34 @@ h1, h2, h3 { margin: 0; font-weight: 900; }
 .tip { min-height: 3em; margin: 16px 0 20px; font-weight: 700; transition: opacity .25s; }
 .tip.fade { opacity: 0; }
 
+/* Senha (código de registro) */
+.gate { animation: gate-in .5s cubic-bezier(.2, 1.2, .4, 1); }
+@keyframes gate-in { from { opacity: 0; transform: translateY(14px); } }
+.gate-label { display: block; margin-bottom: 10px; font-weight: 800; }
+.gate-row { display: flex; gap: 8px; }
+.gate-row input {
+  flex: 1; min-width: 0; padding: 12px 16px; border: 3px solid rgba(255, 255, 255, .5); border-radius: 14px;
+  font: 800 1.1rem "Nunito", sans-serif; letter-spacing: .08em; text-align: center; color: var(--blue-900); background: #fff; outline: none;
+}
+.gate-row input:focus { border-color: #9df27c; box-shadow: 0 0 0 4px rgba(157, 242, 124, .35); }
+.gate-row .btn { flex: none; }
+.gate.erro .gate-row { animation: gate-shake .45s; }
+.gate.erro .gate-row input { border-color: #ff7a7a; }
+@keyframes gate-shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+.gate-msg { min-height: 1.5em; margin: 10px 0 0; font-weight: 700; color: #ffe08a; }
+
+/* Mensagem depois da senha */
+.welcome { margin: 4px 0 20px; animation: gate-in .6s cubic-bezier(.2, 1.2, .4, 1); }
+.welcome-card {
+  padding: 22px 22px 18px; border-radius: var(--radius); text-align: left; color: var(--ink);
+  background: #fffdf8; box-shadow: 0 16px 40px rgba(0, 20, 70, .35);
+}
+.welcome-head { margin: 0 0 12px; font-weight: 900; font-size: .85rem; letter-spacing: .04em; text-transform: uppercase; color: var(--pink); }
+.welcome-card p:not(.welcome-head) { margin: 0 0 12px; font-size: 1.05rem; line-height: 1.6; opacity: 0; transform: translateY(8px); transition: opacity .8s, transform .8s; }
+.welcome-card p.in { opacity: 1; transform: none; }
+.welcome-card .sign { margin: 4px 0 0 !important; text-align: right; font-weight: 800; color: var(--blue-700); }
+#loader.unlocked .loader-bar, #loader.unlocked .tip { display: none; }
+
 /* ---------- Topbar ---------- */
 .topbar {
   position: sticky; top: 0; z-index: 30;
@@ -302,6 +330,63 @@ footer { text-align: center; color: var(--muted); padding: 30px 16px; }
 .pie-opt:hover { background: linear-gradient(180deg, #7de35a, var(--green-dark)); }
 .pie-opt.special { background: linear-gradient(180deg, #ff9ccc, #e8468f); }
 @keyframes pop { to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+
+/* ---------- Rádio ARMY (YouTube) ---------- */
+/* O YouTube exige o player visível com pelo menos 200px de altura */
+.radio {
+  position: fixed; right: 16px; bottom: 16px; z-index: 45; width: 356px; overflow: hidden; color: #fff;
+  border-radius: 20px; background: linear-gradient(160deg, #a77bff, #6a3fd6 55%, #4b22a8);
+  box-shadow: 0 14px 40px rgba(60, 20, 140, .45), inset 0 1px 0 rgba(255, 255, 255, .35);
+  animation: radio-in .5s cubic-bezier(.2, 1.2, .4, 1);
+}
+.radio.playing { animation: radio-in .5s cubic-bezier(.2, 1.2, .4, 1), radio-glow 2.4s ease-in-out infinite; }
+@keyframes radio-in { from { opacity: 0; transform: translateY(30px) scale(.9); } }
+@keyframes radio-glow { 50% { box-shadow: 0 14px 46px rgba(155, 107, 255, .75), inset 0 1px 0 rgba(255, 255, 255, .35); } }
+
+.radio-head { display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 14px; cursor: grab; user-select: none; touch-action: none; }
+.radio.dragging .radio-head { cursor: grabbing; }
+.radio-info { flex: 1; min-width: 0; }
+.radio-info small { display: block; font-size: .7rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; opacity: .8; }
+.radio-title { overflow: hidden; white-space: nowrap; font-weight: 800; font-size: .92rem; mask-image: linear-gradient(90deg, #000 85%, transparent); }
+.radio-title span { display: inline-block; padding-right: 24px; }
+.radio-title.scroll span { animation: radio-marquee var(--dur, 10s) ease-in-out infinite alternate; }
+@keyframes radio-marquee { 0%, 15% { transform: translateX(0); } 85%, 100% { transform: translateX(var(--shift)); } }
+
+/* Equalizador: só dança quando está tocando */
+.radio-eq { flex: none; display: flex; align-items: flex-end; gap: 3px; width: 26px; height: 22px; }
+.radio-eq i { flex: 1; height: 25%; border-radius: 2px; background: #ffd766; }
+.radio.playing .radio-eq i { animation: radio-eq .9s ease-in-out infinite alternate; }
+.radio-eq i:nth-child(2) { animation-delay: -.3s !important; }
+.radio-eq i:nth-child(3) { animation-delay: -.6s !important; }
+.radio-eq i:nth-child(4) { animation-delay: -.15s !important; }
+@keyframes radio-eq { 0% { height: 20%; } 50% { height: 100%; } 100% { height: 45%; } }
+
+.radio button { border: 0; color: #fff; cursor: pointer; font: inherit; background: rgba(255, 255, 255, .16); transition: background .2s, transform .15s; }
+.radio button:hover { background: rgba(255, 255, 255, .3); }
+.radio button:active { transform: scale(.92); }
+.radio-x { flex: none; width: 30px; height: 30px; border-radius: 50%; font-size: .8rem; }
+
+.radio-screen { position: relative; height: 200px; background: #000; }
+.radio-screen iframe { display: block; width: 100%; height: 100%; border: 0; }
+/* Só um aviso: o toque passa direto pro vídeo (o celular só deixa tocar com toque dentro do player) */
+.radio-tap { position: absolute; inset: 0; display: grid; place-items: center; font-size: 1.1rem; font-weight: 800; background: rgba(40, 10, 90, .55); pointer-events: none; }
+
+.radio-progress { height: 6px; background: rgba(255, 255, 255, .2); cursor: pointer; }
+.radio-progress div { width: 0; height: 100%; background: linear-gradient(90deg, #ffd766, #ff9ccc); transition: width .5s linear; }
+
+.radio-ctrl { display: flex; align-items: center; gap: 6px; padding: 10px 12px 12px; }
+.radio-ctrl button { width: 34px; height: 34px; border-radius: 50%; font-size: .85rem; }
+.radio-ctrl .radio-play { width: 42px; height: 42px; font-size: 1rem; background: #fff; color: #6a3fd6; box-shadow: 0 3px 10px rgba(0, 0, 0, .2); }
+.radio-ctrl .radio-play:hover { background: #f3ecff; }
+#radio-shuffle.on { background: #ffd766; color: #4b22a8; }
+.radio-time { width: 74px; font-size: .72rem; font-weight: 800; opacity: .85; font-variant-numeric: tabular-nums; }
+#radio-vol { flex: 1; min-width: 50px; accent-color: #ffd766; cursor: pointer; }
+
+@media (max-width: 760px) {
+  .radio { left: 10px; right: 10px; bottom: 86px; width: auto; }
+  .radio-head { cursor: default; }
+  #radio-vol { display: none; } /* no celular o volume é o do aparelho */
+}
 
 /* ---------- Console de cheats ---------- */
 .cheat-out { margin-top: 8px; max-height: 50vh; overflow-y: auto; font: .85rem/1.7 ui-monospace, Consolas, monospace; color: #cfe8c6; }

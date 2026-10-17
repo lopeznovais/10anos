@@ -757,11 +757,12 @@
     const o = e.detail;
     if (o.anim) play(o.anim, o.quem === "pedro" ? 1 : 0, { icon: o.balao });
   });
-  // Cheats do console que mexem no lote (headlineeffects, clock.advance_game_time, resetsim)
+  // Cheats do console que mexem no lote (headlineeffects, clock.advance_game_time, resetsim, borahae)
   window.addEventListener("sims:cheat", e => {
     const { cmd, arg } = e.detail;
     if (cmd === "headlineeffects") sims.forEach(s => (s.pb.visible = arg));
     if (cmd === "advance_time") gameMin += arg;
+    if (cmd === "borahae") purple.intensity = arg ? 1.5 : 0;
     if (cmd === "resetsim") {
       const s = arg === "pedro" ? pedro : karine;
       act = null;

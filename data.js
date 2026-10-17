@@ -25,8 +25,28 @@ window.SITE = {
   // Cenário do lote 3D: "casa" = planta da casa da Karine · "original" = casinha genérica (versão antiga)
   lote: "casa",
 
+  // ✏️ Música do ARMY Bomb (e do cheat "borahae"): cole o link de um vídeo ou playlist do YouTube.
+  // Deixe "" para desligar o rádio.
+  musicaArmy: "https://www.youtube.com/watch?v=_gyultVTesk&list=RDEMI0V0e34vA6znf4KLMCIbbQ&start_radio=1",
+
   // ✏️ A cachorrinha (cores do pelo em hexadecimal)
   pet: { nome: "Meg", pelo: "#c8894f", orelha: "#7a4a26", barriga: "#f6e6cc", coleira: "#ff5fa2" },
+
+  // ✏️ Senha para entrar no site (aparece como "código de registro", igual na instalação do The Sims).
+  // Não diferencia maiúsculas/minúsculas. Deixe "" para tirar a senha.
+  senha: "Kp18/10/2026",
+  // Dicas que aparecem a cada erro (a última se repete)
+  dicasSenha: [
+    "Código de registro inválido. Confira e tente de novo.",
+    "Hmm, ainda não. Dica: começa com as nossas iniciais.",
+    "Dica: nossas iniciais (K e p) + uma data muito especial, no formato dd/mm/aaaa. 😉",
+  ],
+
+  // ✏️ Mensagem que aparece logo depois que ela acerta a senha
+  mensagemInicial: [
+    "Oi meu amor! 10 anos juntos... Sou tão feliz por ter você comigo por todo esse tempo. Espero que tenhamos muitos mais 10 anos pela frente 🥰",
+    "Sabe que não sou bom em escrever coisas bonitinhas, mas você sempre faz presentinhos incríveis para mim, então tentei fazer um pra você com o que sei fazer, espero que goste. Te amo demais ❤️",
+  ],
 
   // ✏️ Data em que começaram a namorar (ano-mês-dia)
   inicio: "2016-10-01T00:00:00",
@@ -120,7 +140,7 @@ window.SITE = {
     { id: "colheita",  icone: "🌱", titulo: "Colheita Perfeita",     dica: "A horta do quintal está pronta pra colher.",                texto: "Ela cuidou da fazenda inteira. Eu pesquei um peixe e comemorei." },
     { id: "meg",       icone: "🎾", titulo: "Melhor Amiga da Meg",   dica: "A Meg quer brincar de bolinha.",                            texto: "Jogou a bolinha. A Meg trouxe de volta. Repetir 400 vezes." },
     { id: "maroto",    icone: "🦉", titulo: "Mapa do Maroto",        dica: "Tem correspondência chegando no correio.",                  texto: "Juro solenemente que só tenho boas intenções (e fome)." },
-    { id: "borahae",   icone: "💜", titulo: "Borahae Desbloqueado",  dica: "Acenda o ARMY Bomb.",                                       texto: "Aprendi o nome dos sete. Ainda confundo dois. Ela sabe quais." },
+    { id: "borahae",   icone: "💜", titulo: "Borahae Desbloqueado",  dica: "Acenda o ARMY Bomb.",                                       texto: "Aprendi o nome dos sete. Ainda erro todos, kkk. Ela sabe até o aniversário de cada um." },
     { id: "alohomora", icone: "🗝️", titulo: "Curiosa Nível Hogwarts", dica: "Existe um feitiço que abre tudo. Use-o no console de cheats.", texto: "Achou a mensagem secreta. Claro que achou." },
     { id: "eterno",    icone: "🏆", titulo: "Amor Eterno",           dica: "Responda à pergunta do evento final.",                      texto: "10 anos. Zero cheats. Tudo conquistado no modo normal." },
   ],
