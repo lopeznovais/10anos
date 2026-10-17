@@ -200,7 +200,7 @@ window.SITE = {
   // ✏️ A CARTA FINAL. Aqui é sem piada: escreva do coração.
   carta: [
     "Dez anos atrás eu não fazia ideia de que estava começando o melhor jogo da minha vida.",
-    "Com você eu aprendi que a vida é feita de coisas pequenas: um episódio a mais. Você transforma dias comuns em memórias que eu quero guardar pra sempre.",
+    "Com você eu aprendi que são as coisas pequenas que fazem a vida valer a pena: maratonar um dorama juntinhos, cuidar da nossa fazenda no Stardew, rir das bagunças da Meg. Do seu lado, até um dia comum vira uma memória que eu quero guardar pra sempre.",
     "Obrigado por cada abraço, por cada paciência, por cada vez que você escolheu ficar. Obrigado por ser minha parceira de fazenda, de maratona, de aventura e de vida.",
     "Se eu pudesse criar um Sim perfeito, não mudaria nada. Porque ele já existe, e é você.",
     "E como eu sei que você gosta de saber o final antes de começar, aqui vai o spoiler da nossa história: é um final feliz. 💚",
