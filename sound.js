@@ -221,6 +221,13 @@
       SFX[name](ctx.currentTime + 0.01);
     },
     speak,
+    get mudo() { return muted; },
+    // Abaixa a música do site enquanto outra coisa toca (o rádio do YouTube) e volta depois
+    musica(on) {
+      if (!ctx || !timer) return;
+      musicBus.gain.cancelScheduledValues(ctx.currentTime);
+      musicBus.gain.setTargetAtTime(on ? 0.75 : 0, ctx.currentTime, 0.4);
+    },
     toggle() {
       muted = !muted;
       try { localStorage.setItem("sims-mudo", muted ? "1" : "0"); } catch (e) {}
