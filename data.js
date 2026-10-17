@@ -106,18 +106,23 @@ window.SITE = {
     { icone: "💚", rotulo: "Vezes que eu escolheria você de novo",                     valor: "Todas" },
   ],
 
-  // Conquistas (desbloqueiam conforme ela rola a página)
+  // Conquistas: cada uma desbloqueia quando ela descobre um segredo do site.
+  // "dica" aparece enquanto está trancada; "texto" depois de desbloquear.
+  // ⚠️ Não mude o "id" (é ele que liga a conquista ao segredo no código).
   conquistas: [
-    { icone: "💚", titulo: "Química Instantânea",   texto: "Dois Sims se esbarraram e o jogo decidiu: compatibilidade máxima." },
-    { icone: "📺", titulo: "Spoiler Confirmado",    texto: "Leu o final antes do episódio 1. Final feliz: aprovado para maratona." },
-    { icone: "💧", titulo: "Hidratação Assistida",  texto: "\"Amor, bebe água.\" Dito pela 10.000ª vez. Ela bebeu dois goles." },
-    { icone: "😴", titulo: "Boa Noite às 21h",       texto: "Desbloqueada todas as noites, sem falhar uma." },
-    { icone: "🐷", titulo: "Porquinho Registrado",  texto: "Fez porquinho dormindo. Ela nega. Existe testemunha." },
-    { icone: "👨‍👩‍👧", titulo: "Mãe de Mil Famílias", texto: "Criou dezenas de famílias no The Sims. Jogou com quase nenhuma." },
-    { icone: "🌱", titulo: "Colheita Perfeita",     texto: "Ela cuidou da fazenda inteira. Eu pesquei um peixe e comemorei." },
-    { icone: "🪄", titulo: "Mapa do Maroto",        texto: "Juro solenemente que só tenho boas intenções (e fome)." },
-    { icone: "💜", titulo: "Borahae Desbloqueado",  texto: "Aprendi o nome dos sete. Ainda confundo dois. Ela sabe quais." },
-    { icone: "🏆", titulo: "Amor Eterno",           texto: "10 anos. Zero cheats. Tudo conquistado no modo normal." },
+    { id: "quimica",   icone: "💚", titulo: "Química Instantânea",   dica: "Interaja com a Karine (clique nela).",                     texto: "Dois Sims se esbarraram e o jogo decidiu: compatibilidade máxima." },
+    { id: "pedro",     icone: "🕵️", titulo: "Ele Também É Clicável", dica: "O Pedro também tem menu de interação.",                     texto: "Descobriu que dá pra mandar no Pedro. (Sempre deu.)" },
+    { id: "spoiler",   icone: "📺", titulo: "Spoiler Confirmado",    dica: "Ligue a TV do lote 3D.",                                    texto: "Leu o final antes do episódio 1. Final feliz: aprovado para maratona." },
+    { id: "agua",      icone: "💧", titulo: "Hidratação Assistida",  dica: "Faça ela beber água. Pelo menos uma vez.",                  texto: "\"Amor, bebe água.\" Dito pela 10.000ª vez. Ela bebeu dois goles." },
+    { id: "boanoite",  icone: "😴", titulo: "Boa Noite às 21h",      dica: "Acelere o relógio do lote até a hora de dormir.",          texto: "Desbloqueada todas as noites, sem falhar uma." },
+    { id: "porquinho", icone: "🐷", titulo: "Porquinho Registrado",  dica: "Tente falar com ela enquanto ela dorme.",                   texto: "Fez porquinho dormindo. Ela nega. Agora existe testemunha." },
+    { id: "familias",  icone: "👨‍👩‍👧", titulo: "Mãe de Mil Famílias", dica: "Tente trocar de família. Insista.",                       texto: "Criou dezenas de famílias no The Sims. Jogou com quase nenhuma." },
+    { id: "colheita",  icone: "🌱", titulo: "Colheita Perfeita",     dica: "A horta do quintal está pronta pra colher.",                texto: "Ela cuidou da fazenda inteira. Eu pesquei um peixe e comemorei." },
+    { id: "meg",       icone: "🎾", titulo: "Melhor Amiga da Meg",   dica: "A Meg quer brincar de bolinha.",                            texto: "Jogou a bolinha. A Meg trouxe de volta. Repetir 400 vezes." },
+    { id: "maroto",    icone: "🦉", titulo: "Mapa do Maroto",        dica: "Tem correspondência chegando no correio.",                  texto: "Juro solenemente que só tenho boas intenções (e fome)." },
+    { id: "borahae",   icone: "💜", titulo: "Borahae Desbloqueado",  dica: "Acenda o ARMY Bomb.",                                       texto: "Aprendi o nome dos sete. Ainda confundo dois. Ela sabe quais." },
+    { id: "alohomora", icone: "🗝️", titulo: "Curiosa Nível Hogwarts", dica: "Existe um feitiço que abre tudo. Use-o no console de cheats.", texto: "Achou a mensagem secreta. Claro que achou." },
+    { id: "eterno",    icone: "🏆", titulo: "Amor Eterno",           dica: "Responda à pergunta do evento final.",                      texto: "10 anos. Zero cheats. Tudo conquistado no modo normal." },
   ],
 
   // Menu de interação (clique no Sim dela)
@@ -169,8 +174,8 @@ window.SITE = {
     "Pedro, Diretor da Casa Karine",
   ],
 
-  // Easter egg: digite "alohomora" no console de cheats
-  segredo: "Se você achou isso, é porque é a pessoa mais curiosa que eu conheço. E eu amo isso em você. ✏️ (escreva uma mensagem secreta aqui)",
+  // ✏️ Easter egg: digite "alohomora" no console de cheats (troque pela sua mensagem secreta)
+  segredo: "Se você achou isso, é porque é a pessoa mais curiosa que eu conheço. E eu amo isso em você. 💚",
 
   // ✏️ A CARTA FINAL. Aqui é sem piada: escreva do coração.
   carta: [

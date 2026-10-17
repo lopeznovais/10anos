@@ -43,6 +43,7 @@
   $("#hud").innerHTML = `
     <div class="hud-av"><span class="plumbob" id="hud-pb" title="?"></span>${avatar(S.ela, "sm")}</div>
     <div class="hud-txt"><b>${S.ela.apelido}</b><small id="hud-mood"></small></div>
+    <button class="hud-achv" id="hud-achv" title="Conquistas">🏆 <span id="hud-achv-n"></span></button>
     <div class="hud-money">§ <span id="hud-money">${fmt(money)}</span></div>`;
 
   function setMood(m, ms = 6000) {
@@ -189,34 +190,65 @@
   setInterval(tick, 1000);
 
   // ---------- Conquistas ----------
+  // Cada conquista destrava quando ela descobre um segredo (achieve("id")).
+  // O progresso fica salvo no navegador, então recarregar a página não perde nada.
+  const ACHV_KEY = "sims-conquistas";
+  let achieved = new Set();
+  try { achieved = new Set(JSON.parse(localStorage.getItem(ACHV_KEY)) || []); } catch (e) {}
+  const total = S.conquistas.length;
+
   $("#conquistas").innerHTML = S.conquistas.map(c => `
-    <div class="achv-card reveal" data-achv="${c.titulo}">
+    <div class="achv-card reveal" data-achv="${c.id}">
       <div class="achv-ico">${c.icone}<span class="lock">🔒</span></div>
       <h3>${c.titulo}</h3>
-      <p>${c.texto}</p>
+      <p><span class="achv-dica">💡 ${c.dica}</span><span class="achv-texto">${c.texto}</span></p>
     </div>`).join("");
+
+  function paintAchv(id) {
+    const card = $(`.achv-card[data-achv="${id}"]`);
+    if (!card) return;
+    card.classList.add("unlocked");
+    $(".lock", card).textContent = "🏆";
+  }
+  function paintCount() {
+    const n = S.conquistas.filter(c => achieved.has(c.id)).length;
+    $("#hud-achv-n").textContent = `${n}/${total}`;
+    $("#achv-count").textContent = n === total
+      ? `Todas as ${total} conquistas desbloqueadas. Platina! 💎`
+      : `${n} de ${total} segredos encontrados. Explore o site (e o lote 3D) para desbloquear o resto.`;
+    return n;
+  }
 
   // Desbloqueia uma de cada vez, para as notificações não chegarem todas juntas
   const unlockQueue = [];
   let unlocking = false;
   function nextUnlock() {
-    const card = unlockQueue.shift();
-    if (!card) return (unlocking = false);
+    const c = unlockQueue.shift();
+    if (!c) return (unlocking = false);
     unlocking = true;
-    card.classList.add("unlocked");
-    $(".lock", card).textContent = "🏆";
-    toast("Conquista desbloqueada!", card.dataset.achv, "🏆");
-    setTimeout(nextUnlock, 700);
+    paintAchv(c.id);
+    const n = paintCount();
+    toast("Conquista desbloqueada!", `${c.titulo} (${n}/${total})`, "🏆");
+    $("#hud-achv").classList.remove("pulse");
+    void $("#hud-achv").offsetWidth;
+    $("#hud-achv").classList.add("pulse");
+    if (n === total) setTimeout(() => {
+      toast("Platina! 💎", `${S.ela.apelido} encontrou todos os segredos. Ninguém conhece esse jogo melhor que você.`, "💎");
+      confetti(60, ["🏆", "💎", "💚", "✨"]);
+    }, 1200);
+    setTimeout(nextUnlock, 1600);
   }
-  const unlockObs = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (!e.isIntersecting) return;
-      unlockObs.unobserve(e.target);
-      unlockQueue.push(e.target);
-    });
-    if (!unlocking && unlockQueue.length) setTimeout(nextUnlock, 400);
-  }, { threshold: 0.8 });
-  $$(".achv-card").forEach(c => unlockObs.observe(c));
+  function achieve(id) {
+    const c = S.conquistas.find(x => x.id === id);
+    if (!c || achieved.has(id)) return;
+    achieved.add(id);
+    try { localStorage.setItem(ACHV_KEY, JSON.stringify([...achieved])); } catch (e) {}
+    unlockQueue.push(c);
+    if (!unlocking) setTimeout(nextUnlock, 300);
+  }
+  achieved.forEach(paintAchv);
+  paintCount();
+  $("#hud-achv").addEventListener("click", () => $("#aspiracao").scrollIntoView({ behavior: "smooth" }));
 
   // ---------- Carta final ----------
   $("#letter").innerHTML = S.carta.map(p => `<p>${p}</p>`).join("") + `<p class="sign">${S.assinatura}</p>`;
@@ -271,6 +303,8 @@
     const o = PIES[pieWho].opts[btn.dataset.i];
     window.SIMSOUND?.play("clique");
     window.SIMSOUND?.speak(pieWho);
+    achieve(pieWho === "pedro" ? "pedro" : "quimica");
+    if (pieWho === "karine" && o.anim === "agua") achieve("agua");
     if (o.final) {
       $("#evento").scrollIntoView({ behavior: "smooth" });
       toast(o.titulo, "Um evento especial está acontecendo...", "💍");
@@ -315,6 +349,7 @@
       card.classList.add("erro");
       famMsg.textContent = S.errosFamilia[famTries++ % S.errosFamilia.length];
       window.SIMSOUND?.play("erro");
+      if (famTries >= S.errosFamilia.length) achieve("familias");
     }, 1100);
   });
 
@@ -341,6 +376,7 @@
     setMood({ emoji: "💖", nome: "Apaixonada pra sempre" }, 1e9);
     addMoney(100000);
     window.dispatchEvent(new CustomEvent("sims:final"));
+    setTimeout(() => achieve("eterno"), 2500);
     window.SIMSOUND?.play("vitoria");
     setTimeout(() => window.SIMSOUND?.speak("karine", "Sul sul! Borahae!"), 900);
     toast("Aspiração concluída!", "Amor Eterno: +10 anos (renováveis automaticamente).", "💖");
@@ -362,40 +398,226 @@
   }
 
   // ---------- Cheats ----------
-  const cheat = $("#cheat"), input = $("#cheat-input");
-  const openCheat = () => { cheat.classList.remove("hidden"); input.value = ""; input.focus(); };
+  // Os mesmos códigos do The Sims (1 ao 4), com o efeito adaptado ao site.
+  // Como no jogo: alguns só funcionam depois de "testingcheats true".
+  const cheat = $("#cheat"), input = $("#cheat-input"), cheatOut = $("#cheat-out");
+  const cheatHistory = [];
+  let histPos = 0;
+  const openCheat = () => { cheat.classList.remove("hidden"); cheatOut.classList.add("hidden"); input.value = ""; histPos = cheatHistory.length; input.focus(); };
   document.addEventListener("keydown", e => {
-    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "c") { e.preventDefault(); openCheat(); }
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "c") {
+      e.preventDefault();
+      cheat.classList.contains("hidden") ? openCheat() : cheat.classList.add("hidden");
+    }
   });
   $("#cheat-hint").addEventListener("click", openCheat);
   let pbTaps = 0;
   $("#hud-pb").addEventListener("click", () => { if (++pbTaps >= 5) { pbTaps = 0; openCheat(); } });
 
+  const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const lote = (cmd, arg) => window.dispatchEvent(new CustomEvent("sims:cheat", { detail: { cmd, arg } }));
+  const onOff = a => !["off", "false", "0"].includes(a); // "on", "true" ou nada = ligado
+  let testing = false;
+  const needTesting = fn => args => testing ? fn(args)
+    : toast("Cheat bloqueado", "Este cheat precisa de <b>testingcheats true</b> primeiro. (Igualzinho ao jogo.)", "🔒");
+
+  function setMoney(n) { addMoney(Math.max(0, Math.round(n)) - money); }
+
+  // Necessidades: enche a barra (fillmotive) e atualiza o painel
+  const MOTIVES = { hunger: "Fome", energy: "Energia", fun: "Diversão", social: "Social", bladder: "Bexiga", comfort: "Conforto", hydration: "Hidratação", thirst: "Hidratação" };
+  function fillNeed(i) {
+    const n = S.necessidades[i], el = $$("#needs .need")[i];
+    n.valor = 100;
+    if (!el) return;
+    $(".pct", el).textContent = "100%";
+    const f = $(".fill", el);
+    f.dataset.w = 100;
+    f.style.width = "100%";
+    f.classList.remove("low", "mid");
+  }
+
+  // Humores (sims.add_buff)
+  const BUFFS = {
+    flirty: ["😘", "Paquerando"], happy: ["😊", "Feliz"], energized: ["⚡", "Energizada"], inspired: ["🤩", "Inspirada"],
+    confident: ["😎", "Confiante"], playful: ["😜", "Brincalhona"], focused: ["🧐", "Focada"], sad: ["🥺", "Triste"],
+    angry: ["😤", "Irritada"], tense: ["😬", "Tensa"], embarrassed: ["😳", "Envergonhada"], uncomfortable: ["😣", "Desconfortável"],
+  };
+  const NEGATIVE = ["sad", "angry", "tense", "embarrassed", "uncomfortable"];
+
+  const HELP = [
+    "<b>Dinheiro:</b> motherlode · kaching · rosebud · klapaucius · money 9999 · freerealestate on",
+    "<b>Sims:</b> testingcheats true · sims.fill_all_commodities · fillmotive motive_hunger · sims.add_buff flirty · sims.remove_all_buffs · resetsim karine",
+    "<b>Mundo:</b> headlineeffects off · clock.advance_game_time 3 0 0 · aging off · death.toggle false · fps on",
+    "<b>Construir:</b> bb.moveobjects on · bb.showhiddenobjects · bb.enablefreebuild · cas.fulleditmode",
+    "<b>Vida:</b> careers.promote · stats.set_skill_level major_gardening 10 · modifyrelationship · aspirations.complete_current_milestone",
+    "<b>Daqui:</b> borahae · alohomora · sulsul",
+  ].join("<br>");
+
   const CHEATS = {
-    help: () => toast("Cheats disponíveis", "motherlode · kaching · rosebud · testingcheats true · borahae · alohomora · sulsul", "🔧"),
+    // A lista é grande demais pra uma notificação: aparece dentro do console, que fica aberto
+    help: () => { cheat.classList.remove("hidden"); cheatOut.innerHTML = HELP; cheatOut.classList.remove("hidden"); return "manter-aberto"; },
+
+    // ----- Dinheiro -----
     motherlode: () => { addMoney(50000); toast("Motherlode!", "+§50.000. Mas nada compra o que a gente tem.", "💰"); },
     kaching: () => { addMoney(1000); toast("Kaching!", "+§1.000. Suficiente pra um tteokbokki.", "💸"); },
     rosebud: () => { addMoney(1000); toast("Rosebud!", "Clássico. Que nem a gente.", "🌹"); },
-    "testingcheats true": () => toast("Cheats ativados", "Mas esse amor é 100% legítimo. Nenhuma trapaça foi usada nesses 10 anos.", "✅"),
+    klapaucius: () => { addMoney(1000); toast("Klapaucius!", "+§1.000. Cheat raiz do The Sims 1. Respeite os mais velhos.", "💾"); },
+    money: ([v]) => {
+      const n = Number(v);
+      if (!Number.isFinite(n)) return toast("Uso: money 9999", "Diga quanto. Ex.: <b>money 1000000</b>", "❓");
+      setMoney(n);
+      toast("Simoleons definidos", `§${fmt(Math.max(0, n))}. Mas a gente sabe que a maior riqueza aqui não é essa.`, "💰");
+    },
+    freerealestate: ([a]) => toast(onOff(a) ? "Imóveis grátis!" : "Imóveis pagos de novo",
+      onOff(a) ? "Pode escolher qualquer casa da vizinhança. Mas a casa certa é onde ela estiver." : "Ok, ok. Ninguém vai se mudar mesmo.", "🏡"),
+
+    // ----- Testing cheats -----
+    testingcheats: ([a]) => {
+      testing = onOff(a);
+      toast(testing ? "Testing cheats ativados" : "Testing cheats desativados",
+        testing ? "Mas esse amor é 100% legítimo. Nenhuma trapaça foi usada nesses 10 anos." : "Modo normal. Do jeito que a gente sempre jogou.", testing ? "✅" : "⛔");
+    },
+
+    // ----- Necessidades -----
+    "sims.fill_all_commodities": needTesting(() => {
+      S.necessidades.forEach((n, i) => { if (!n.especial) fillNeed(i); });
+      setMood({ emoji: "😊", nome: "Satisfeita" });
+      toast("Necessidades no máximo", "Fome, Energia, Hidratação... tudo cheio. Dura uns 15 minutos (a Fome, 5).", "📊");
+    }),
+    fillmotive: needTesting(([m = ""]) => {
+      const nome = MOTIVES[m.replace(/^motive_/, "")];
+      if (m.replace(/^motive_/, "") === "hygiene") return toast("Higiene", "Essa barra nem aparece. Skincare de 10 passos, lembra?", "🧴");
+      const i = S.necessidades.findIndex(n => n.nome === nome);
+      if (i < 0) return toast("Uso: fillmotive motive_hunger", "Opções: motive_hunger · motive_energy · motive_fun · motive_social · motive_bladder · motive_comfort · motive_hydration", "❓");
+      fillNeed(i);
+      const piadas = { Fome: "Cheia! (Pergunta de novo daqui a 20 minutos.)", Energia: "Energia cheia. Mesmo assim às 21h ela dorme.", Hidratação: "Ela bebeu? Não. Mas a barra encheu.", Bexiga: "Barra cheia. O filme pode começar em paz." };
+      toast(`${nome} no máximo`, piadas[nome] || "Barra cheia!", "📊");
+    }),
+
+    // ----- Humores -----
+    "sims.add_buff": ([b = ""]) => {
+      const k = b.replace(/^(e_)?buff_/, "");
+      const buff = BUFFS[k];
+      if (!buff) return toast("Uso: sims.add_buff flirty", `Humores: ${Object.keys(BUFFS).join(" · ")}`, "❓");
+      if (NEGATIVE.includes(k)) {
+        setMood({ emoji: "😍", nome: "Apaixonada" });
+        return toast("Humor recusado", `${S.ela.nome} rejeitou o humor "${buff[1]}". Ela tá com você, não tem como.`, "🙅");
+      }
+      setMood({ emoji: buff[0], nome: buff[1] }, 15000);
+      toast("Humor adicionado", `${S.ela.nome} está ${buff[1]} ${buff[0]}`, buff[0]);
+    },
+    "sims.remove_all_buffs": () => {
+      setMood(DEFAULT_MOOD);
+      toast("Humores removidos", "Todos menos um: \"Apaixonada\" é permanente. Já tentaram.", "💚");
+    },
+    "sims.remove_buff": () => CHEATS["sims.remove_all_buffs"](),
+
+    // ----- Sims e mundo -----
+    resetsim: ([nome = S.ela.nome.toLowerCase()]) => {
+      const quem = nome === S.ele.nome.toLowerCase() ? "pedro" : nome === S.ela.nome.toLowerCase() ? "karine" : null;
+      if (!quem) return toast("Sim não encontrado", `Nessa casa só tem ${S.ela.nome} e ${S.ele.nome} (e a ${S.pet.nome}, mas ela não trava).`, "❓");
+      lote("resetsim", quem);
+      toast("Sim resetado", `${quem === "pedro" ? S.ele.nome : S.ela.nome} voltou pro quintal, novinho em folha.`, "🔄");
+    },
+    headlineeffects: ([a]) => {
+      const on = onOff(a);
+      document.body.classList.toggle("no-headline", !on);
+      lote("headlineeffects", on);
+      toast(on ? "Plumbobs de volta" : "Plumbobs escondidos", on ? "Agora dá pra ver de novo quem está no controle." : "Pra tirar print sem o diamante na cabeça. 📸", "💎");
+    },
+    "clock.advance_game_time": ([h = "1", m = "0"]) => {
+      const min = (Number(h) || 0) * 60 + (Number(m) || 0);
+      if (min <= 0) return toast("Uso: clock.advance_game_time 3 0 0", "Horas, minutos, segundos.", "❓");
+      lote("advance_time", min);
+      toast("Relógio adiantado", `+${Math.floor(min / 60)}h${String(min % 60).padStart(2, "0")} no lote. Cuidado com as 21h.`, "⏩");
+    },
+    aging: ([a]) => toast(onOff(a) ? "Envelhecimento... não." : "Envelhecimento desativado",
+      onOff(a) ? "Esse cheat foi bloqueado. Jovem Adulta pra sempre, tá no perfil." : "Jovem Adulta pra sempre. (Já estava, mas agora é oficial.)", "⏳"),
+    "aging.toggle": ([a]) => CHEATS.aging([a]),
+    "death.toggle": ([a]) => toast(onOff(a) ? "Morte ativada?" : "Morte desativada",
+      onOff(a) ? "Negado. Ninguém sai desse jogo." : "Ninguém sai desse jogo. Nem a Meg, nem o Pedro, nem o dorama favorito.", "👻"),
+    fps: ([a]) => toggleFps(onOff(a)),
+
+    // ----- Construir / CAS -----
+    "bb.moveobjects": ([a]) => toast(onOff(a) ? "Mover objetos: ligado" : "Mover objetos: desligado",
+      onOff(a) ? "Pode mover qualquer coisa. Menos a coberta: ela pertence à Karine." : "Tudo de volta no lugar.", "🛋️"),
+    move_objects: a => CHEATS["bb.moveobjects"](a),
+    "bb.showhiddenobjects": () => toast("Objetos escondidos", "Encontrado: 1 coberta roubada, 3 garrafinhas de água cheias (nunca abertas) e 1 controle remoto.", "🔍"),
+    "bb.showliveeditobjects": () => CHEATS["bb.showhiddenobjects"](),
+    "bb.enablefreebuild": () => toast("Construção livre", "Pode construir onde quiser. Sugestão: mais um quarto pra ela criar famílias.", "🧱"),
+    "bb.ignoregameplayunlocksentitlement": () => toast("Tudo desbloqueado", "Inclusive a recompensa final. Mas ela tem que aceitar primeiro. 💍", "🔓"),
+    "cas.fulleditmode": needTesting(() => {
+      $("#cas").scrollIntoView({ behavior: "smooth" });
+      toast("Criar um Sim: edição total", "Abrindo... Nada pra editar. Esse Sim já veio perfeito de fábrica.", "✨");
+    }),
+
+    // ----- Vida -----
+    "careers.promote": () => toast("Promoção!", `${S.ela.nome} foi promovida a Diretora da Casa ${S.ela.nome}. Salário: abraços ilimitados.`, "💼"),
+    "stats.set_skill_level": ([skill = "", nivel = "10"]) => {
+      const nome = skill.replace(/^(major|minor|adultmajor)_/, "").replace(/_/g, " ") || "?";
+      toast(`Habilidade: ${esc(nome)}`, `Nível ${esc(nivel)}. ${nome.includes("garden") ? "Ela já era nível 10 em Stardew." : "Igual a ela: no máximo."}`, "📈");
+    },
+    modifyrelationship: () => toast("Relacionamento", "Não dá pra modificar: Amizade 100, Romance 100, travados desde 2016.", "💞"),
+    "relationship.introduce_sim_to_all": () => toast("Apresentações feitas", `${S.ela.nome} agora conhece todo mundo da ${S.vizinhanca}. Já sabe a fofoca de todos.`, "👋"),
+    "aspirations.complete_current_milestone": () => toast("Cheat recusado", "A aspiração Amor Eterno não aceita atalhos. 10 anos, zero cheats, lembra? Vai ter que descobrir os segredos.", "🏆"),
+
+    // ----- Exclusivos deste jogo -----
     borahae: () => {
       const on = document.body.classList.toggle("borahae");
       toast(on ? "보라해 💜" : "Modo normal", on ? "I purple you. Frase criada pelo V, o bias dela. Tema ARMY ativado." : "De volta ao azul do Modo Viver.", "💜");
-      if (on) confetti(40, ["💜", "🫰", "✨"]);
+      if (on) { confetti(40, ["💜", "🫰", "✨"]); achieve("borahae"); }
     },
-    alohomora: () => toast("Mensagem secreta desbloqueada", S.segredo, "🗝️"),
+    alohomora: () => { toast("Mensagem secreta desbloqueada", S.segredo, "🗝️"); achieve("alohomora"); },
     sulsul: () => toast("Sul Sul!", "Nooboo! Vadish! (Tradução: te amo muito.)", "👋"),
   };
+
+  // Contador de FPS, igual ao "fps on" do jogo
+  let fpsEl = null;
+  function toggleFps(on) {
+    if (!on) { fpsEl?.remove(); fpsEl = null; return; }
+    if (fpsEl) return;
+    fpsEl = document.createElement("div");
+    fpsEl.className = "fps";
+    document.body.appendChild(fpsEl);
+    let frames = 0, t0 = performance.now();
+    const loop = now => {
+      if (!fpsEl) return;
+      frames++;
+      if (now - t0 >= 500) { fpsEl.textContent = `FPS: ${Math.round((frames * 1000) / (now - t0))} · 💚 100%`; frames = 0; t0 = now; }
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  }
+
+  // Aceita "testingcheats true", "money 500", "fillmotive motive_hunger", em qualquer caixa
+  function runCheat(raw) {
+    const [name, ...args] = raw.trim().toLowerCase().split(/\s+/);
+    if (!name) return;
+    const fn = CHEATS[name];
+    if (fn) return fn(args);
+    toast("Cheat desconhecido", `"${esc(raw.trim())}" não existe. Tente "help".`, "❓");
+  }
   input.addEventListener("keydown", e => {
+    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      e.preventDefault();
+      histPos = Math.min(cheatHistory.length, Math.max(0, histPos + (e.key === "ArrowUp" ? -1 : 1)));
+      input.value = cheatHistory[histPos] || "";
+      return;
+    }
     if (e.key !== "Enter") return;
-    const cmd = input.value.trim().toLowerCase();
-    (CHEATS[cmd] || (() => toast("Cheat desconhecido", `"${cmd}" não existe. Tente "help".`, "❓")))();
+    const cmd = input.value.trim();
+    input.value = "";
+    if (cmd) cheatHistory.push(cmd);
+    histPos = cheatHistory.length;
+    if (cmd && runCheat(cmd) === "manter-aberto") return;
     cheat.classList.add("hidden");
+    cheatOut.classList.add("hidden");
   });
 
   // API usada pelo lote 3D (lot3d.js)
   window.SIMS = {
-    toast, setMood, confetti,
+    toast, setMood, confetti, achieve,
     openPieAt: (x, y, who) => openPie({ left: x, top: y, width: 0, height: 0 }, who),
-    cheat: name => CHEATS[name]?.(),
+    cheat: runCheat,
   };
 })();
